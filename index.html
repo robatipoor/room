@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<!-- Import JavaScript Libraries. -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web-socket-js/1.0.0/WebSocketMain.swf"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web-socket-js/1.0.0/web_socket.min.js"></script>
+
+<script type="text/javascript">
+
+    // Let the library know where WebSocketMain.swf is:
+    WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf";
+
+    // Write your code in the same way as for native WebSocket:
+    var ws = new WebSocket("ws://0.0.0.0:8080/");
+    ws.onopen = function () {
+        ws.send("Hello");  // Sends a message.
+    };
+    ws.onmessage = function (e) {
+        // Receives a message.
+        alert(e.data);
+    };
+    ws.onclose = function () {
+        alert("closed");
+    };
+
+</script>
+
+<body>
+
+</body>
+
+</html>

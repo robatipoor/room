@@ -9,6 +9,11 @@ use tokio::{
         Mutex,
     },
 };
+
+const INDEX_HMTL: &str = "<html>
+hello World
+</html>";
+
 use tokio_tungstenite::tungstenite::Message;
 
 type State = Arc<Mutex<HashMap<SocketAddr, UnboundedSender<String>>>>;
@@ -43,16 +48,27 @@ async fn handler(stream: TcpStream, addr: SocketAddr, state: State) -> Result<()
         let mut guard = state.lock().await;
         guard.insert(addr, tx);
     }
-    // send html page
-    // new user join to room message to other
+    outgoing.send(Message::Text(INDEX_HMTL.to_string())).await;
+    broadcast(&state, &addr, &addr.to_string()).await;
     loop {
         tokio::select! {
             Some(msg) = rx.recv() => {
                 outgoing.send(Message::Text(msg)).await;
             }
-            msg = incoming.next() => {
-                // broadcast message
+            Some(msg) = incoming.next() => {
+                let msg = msg.unwrap();
+                let msg = msg.to_text().unwrap();
+                broadcast(&state, &addr, msg).await;
             }
+        }
+    }
+}
+
+pub async fn broadcast(state: &State, sender_addr: &SocketAddr, msg: &str) {
+    let guard = state.lock().await;
+    for (addr, tx) in guard.iter() {
+        if addr != sender_addr {
+            tx.send(msg.to_string());
         }
     }
 }
